@@ -25,7 +25,8 @@ if (!infuraApiKey) {
 const chainIds = {
   'arbitrum-mainnet': 42161,
   avalanche: 43114,
-  bsc: 56,
+  'bsc-mainnet': 56,
+  bsc: 97, // testnet
   goerli: 5,
   hardhat: 31337,
   mainnet: 1,
@@ -41,6 +42,9 @@ function getChainConfig(chain: keyof typeof chainIds): NetworkUserConfig {
       jsonRpcUrl = 'https://api.avax.network/ext/bc/C/rpc'
       break
     case 'bsc':
+      jsonRpcUrl = 'https://data-seed-prebsc-1-s1.binance.org:8545/'
+      break
+    case 'bsc-mainnet':
       jsonRpcUrl = 'https://bsc-dataseed1.binance.org'
       break
     default:
@@ -64,6 +68,7 @@ const config: HardhatUserConfig = {
       arbitrumOne: process.env.ARBISCAN_API_KEY || '',
       avalanche: process.env.SNOWTRACE_API_KEY || '',
       bsc: process.env.BSCSCAN_API_KEY || '',
+      bscTestnet: process.env.BSCSCAN_API_KEY || '',
       goerli: process.env.ETHERSCAN_API_KEY || '',
       mainnet: process.env.ETHERSCAN_API_KEY || '',
       optimisticEthereum: process.env.OPTIMISM_API_KEY || '',
@@ -86,7 +91,8 @@ const config: HardhatUserConfig = {
     },
     arbitrum: getChainConfig('arbitrum-mainnet'),
     avalanche: getChainConfig('avalanche'),
-    bsc: getChainConfig('bsc'),
+    bsc: getChainConfig('bsc'), // NOTE: testnet
+    'bsc-mainnet': getChainConfig('bsc-mainnet'),
     goerli: getChainConfig('goerli'),
     mainnet: getChainConfig('mainnet'),
     optimism: getChainConfig('optimism-mainnet'),

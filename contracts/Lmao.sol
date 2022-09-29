@@ -13,6 +13,16 @@ contract Lmao {
 
     event Log(string indexed str);
     event TokenTransferred(address indexed addr);
+    event BridgeReceivedLog(
+        address wrappedAsset,
+        uint8 payloadID,
+        uint256 amount,
+        address tokenAddress,
+        uint16 tokenChain,
+        bytes32 to,
+        uint16 toChain,
+        address fromAddress
+    );
 
     IWormhole immutable CORE_BRIDGE;
     ITokenBridge immutable TOKEN_BRIDGE;
@@ -109,15 +119,26 @@ contract Lmao {
         // Can only be redeemed once, will automatically fail by the bridge afterwards
         BridgeStructs.TransferWithPayload memory vaa = _decodeVaaPayload(TOKEN_BRIDGE.completeTransferWithPayload(encodedVm));
 
-        require(vaa.toChain == WORMHOLE_CHAIN_ID, "Wrong Chain ID!");
+//        require(vaa.toChain == WORMHOLE_CHAIN_ID, "Wrong Chain ID!");
 
 //        // https://github.com/wormhole-foundation/wormhole/blob/dev.v2/ethereum/contracts/bridge/BridgeGetters.sol#L49
         address wrapped = TOKEN_BRIDGE.wrappedAsset(vaa.tokenChain, vaa.tokenAddress);
         require(wrapped != address(0), 'No wrapper for this token created yet');
 
+        emit BridgeReceivedLog({
+            wrappedAsset: wrapped,
+            payloadID: vaa.payloadID,
+            amount: vaa.amount,
+            tokenAddress: bytes32ToAddress(vaa.tokenAddress),
+            tokenChain: vaa.tokenChain,
+            to: vaa.to,
+            toChain: vaa.toChain,
+            fromAddress: bytes32ToAddress(vaa.fromAddress)
+        });
+
         address receiver = bytesToAddress(vaa.payload.slice(0, 20));
-        require(IERC20(wrapped).balanceOf(address(this)) >= vaa.amount, 'Insufficient amount of token to transfer');
-        require(IERC20(wrapped).transferFrom(address(this), receiver, vaa.amount), 'Transfer of token failed');
+//        require(IERC20(wrapped).balanceOf(address(this)) >= vaa.amount, 'Insufficient amount of token to transfer');
+//        require(IERC20(wrapped).transferFrom(address(this), receiver, vaa.amount), 'Transfer of token failed');
 
         emit TokenTransferred(receiver);
 
